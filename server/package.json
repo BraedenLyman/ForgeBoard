@@ -1,0 +1,28 @@
+{
+  "name": "forgeboard-server",
+  "version": "1.0.0",
+  "description": "ForgeBoard backend API",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/scripts/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.3",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3",
+    "zod": "^3.21.4",
+    "cors": "^2.8.5",
+    "cookie-parser": "^1.4.6",
+    "pdfkit": "^0.13.0",
+    "morgan": "^1.10.0",
+    "express-async-errors": "^3.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
