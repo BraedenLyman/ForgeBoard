@@ -3,6 +3,15 @@ import { useParams } from 'react-router-dom';
 import { Card, Loading, Error, Badge } from '../components/UI.jsx';
 import { api } from '../utils/api.js';
 
+const formatPhone = (value) => {
+  if (!value) return '';
+  const digits = String(value).replace(/\D/g, '').slice(0, 10);
+  if (digits.length === 0) return '';
+  if (digits.length <= 3) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+};
+
 export const ClientDetail = () => {
   const { id } = useParams();
   const [client, setClient] = useState(null);
@@ -36,7 +45,7 @@ export const ClientDetail = () => {
         <Card>
           <h2 className="text-xl font-bold mb-4">Contact Info</h2>
           <p><strong>Email:</strong> {client.email || 'N/A'}</p>
-          <p><strong>Phone:</strong> {client.phone || 'N/A'}</p>
+          <p><strong>Phone:</strong> {formatPhone(client.phone) || 'N/A'}</p>
           <p><strong>Company:</strong> {client.company || 'N/A'}</p>
           {client.notes && (
             <p><strong>Notes:</strong> {client.notes}</p>
