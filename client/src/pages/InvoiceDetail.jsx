@@ -46,21 +46,29 @@ export const InvoiceDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
         <h1 className="text-3xl font-bold">{invoice.number}</h1>
-        <div className="flex gap-2">
-          <Button onClick={handleDownloadPDF} variant="secondary">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            onClick={handleDownloadPDF}
+            variant="secondary"
+            className="text-sm px-3 py-1.5 sm:text-base sm:px-4 sm:py-2 inline-flex items-center justify-center text-center"
+          >
             <FileDown className="w-4 h-4 mr-2" /> Export PDF
           </Button>
           {invoice.status !== 'paid' && (
-            <Button onClick={handleMarkPaid} variant="primary">
+            <Button
+              onClick={handleMarkPaid}
+              variant="primary"
+              className="text-sm px-3 py-1.5 sm:text-base sm:px-4 sm:py-2 inline-flex items-center justify-center text-center"
+            >
               Mark as Paid
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <p className="text-slate-600">Status</p>
           <Badge color={invoice.status === 'paid' ? 'green' : 'yellow'} className="text-lg">
@@ -69,7 +77,9 @@ export const InvoiceDetail = () => {
         </Card>
         <Card>
           <p className="text-slate-600">Amount</p>
-          <p className="text-3xl font-bold">${(invoice.totalCents / 100).toFixed(2)}</p>
+          <p className="font-bold tracking-tight whitespace-nowrap max-w-full truncate text-[clamp(1.25rem,3vw,1.875rem)]">
+            ${ (invoice.totalCents / 100).toFixed(2) }
+          </p>
         </Card>
         <Card>
           <p className="text-slate-600">Due Date</p>

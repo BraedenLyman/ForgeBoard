@@ -45,10 +45,22 @@ export const Projects = () => {
     }
   };
 
+  const projectTitleRegex = /^[A-Za-z0-9 ]+$/;
+  const projectDescriptionRegex = /^[A-Za-z0-9 .!?$#%(),'" ]+$/;
+  const sanitizeTitleInput = (raw) => raw.replace(/[^A-Za-z0-9 ]+/g, '');
+  const sanitizeDescriptionInput = (raw) => raw.replace(/[^A-Za-z0-9 .!?$#%(),'" ]+/g, '');
+
   const validateProject = (data) => {
     const errors = {};
     if (!data.clientId || !String(data.clientId).trim()) errors.clientId = 'Client is required';
-    if (!data.title || !String(data.title).trim()) errors.title = 'Title is required';
+    if (!data.title || !String(data.title).trim()) {
+      errors.title = 'Title is required';
+    } else if (!projectTitleRegex.test(String(data.title).trim())) {
+      errors.title = 'Title may only include letters, numbers, and spaces';
+    }
+    if (data.description && !projectDescriptionRegex.test(String(data.description))) {
+      errors.description = 'Description contains invalid characters';
+    }
     return errors;
   };
 
@@ -156,7 +168,7 @@ export const Projects = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
         <h1 className="text-3xl font-bold">Projects</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Project</span>
@@ -188,13 +200,27 @@ export const Projects = () => {
             label="Title"
             value={formData.title}
             error={formErrors.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) => {
+              const value = sanitizeTitleInput(e.target.value);
+              setFormData({ ...formData, title: value });
+              if (formErrors.title && String(value).trim() && projectTitleRegex.test(String(value).trim())) {
+                setFormErrors({ ...formErrors, title: '' });
+              }
+            }}
+            pattern="[A-Za-z0-9 ]+"
             required
           />
           <Input
             label="Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            error={formErrors.description}
+            onChange={(e) => {
+              const value = sanitizeDescriptionInput(e.target.value);
+              setFormData({ ...formData, description: value });
+              if (formErrors.description && projectDescriptionRegex.test(String(value))) {
+                setFormErrors({ ...formErrors, description: '' });
+              }
+            }}
           />
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Status</label>
@@ -241,17 +267,27 @@ export const Projects = () => {
               label="Title"
               value={editModal.project.title}
               error={editErrors.title}
-              onChange={(e) =>
-                setEditModal({ ...editModal, project: { ...editModal.project, title: e.target.value } })
-              }
+              onChange={(e) => {
+                const value = sanitizeTitleInput(e.target.value);
+                setEditModal({ ...editModal, project: { ...editModal.project, title: value } });
+                if (editErrors.title && String(value).trim() && projectTitleRegex.test(String(value).trim())) {
+                  setEditErrors({ ...editErrors, title: '' });
+                }
+              }}
+              pattern="[A-Za-z0-9 ]+"
               required
             />
             <Input
               label="Description"
               value={editModal.project.description || ''}
-              onChange={(e) =>
-                setEditModal({ ...editModal, project: { ...editModal.project, description: e.target.value } })
-              }
+              error={editErrors.description}
+              onChange={(e) => {
+                const value = sanitizeDescriptionInput(e.target.value);
+                setEditModal({ ...editModal, project: { ...editModal.project, description: value } });
+                if (editErrors.description && projectDescriptionRegex.test(String(value))) {
+                  setEditErrors({ ...editErrors, description: '' });
+                }
+              }}
             />
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Status</label>

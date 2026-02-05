@@ -40,8 +40,8 @@ export const Popover = ({ open, anchorRef, onClose, children, className = '' }) 
     </div>
   );
 };
-export const Button = ({ children, variant = 'primary', disabled, ...props }) => {
-  const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-colors';
+export const Button = ({ children, variant = 'primary', disabled, className = '', ...props }) => {
+  const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-colors text-center inline-flex items-center justify-center';
   const variants = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50',
     secondary: 'bg-slate-200 text-slate-900 hover:bg-slate-300 disabled:opacity-50',
@@ -50,7 +50,7 @@ export const Button = ({ children, variant = 'primary', disabled, ...props }) =>
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]}`} disabled={disabled} {...props}>
+    <button className={`${baseStyles} ${variants[variant]} ${className}`} disabled={disabled} {...props}>
       {children}
     </button>
   );

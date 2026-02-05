@@ -1,7 +1,15 @@
 import mongoose from 'mongoose';
 
 const invoiceLineItemSchema = new mongoose.Schema({
-  description: { type: String, required: true },
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+    validate: {
+      validator: (value) => /^[A-Za-z0-9 .!?$#%(),'" ]+$/.test(value),
+      message: 'Description contains invalid characters',
+    },
+  },
   qty: { type: Number, default: 1 },
   unitPriceCents: { type: Number, required: true },
 });

@@ -53,10 +53,10 @@ export const Clients = () => {
 
   const clientNameRegex = /^[A-Za-z ]+$/;
   const companyNameRegex = /^[A-Za-z0-9 -]+$/;
-  const clientNotesRegex = /^[A-Za-z0-9 .,\-?!()]+$/;
+  const clientNotesRegex = /^[A-Za-z0-9 .!?$#%(),'" ]+$/;
   const sanitizeNameInput = (raw) => raw.replace(/[^A-Za-z ]+/g, '');
   const sanitizeCompanyInput = (raw) => raw.replace(/[^A-Za-z0-9 -]+/g, '');
-  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9 .,\-?!()]+/g, '').slice(0, 150);
+  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9 .!?$#%(),'" ]+/g, '').slice(0, 150);
 
   const validateClient = (data) => {
     const errors = {};
@@ -75,7 +75,7 @@ export const Clients = () => {
       errors.company = 'Company may only include letters, numbers, dashes, and spaces';
     }
     if (data.notes && (!clientNotesRegex.test(String(data.notes)) || String(data.notes).length > 150)) {
-      errors.notes = 'Notes may only include letters, numbers, spaces, and . , - ? ! ( ) (max 150 chars)';
+      errors.notes = 'Notes may only include letters, numbers, spaces, and . ! ? $ # % ( ) , \' " (max 150 chars)';
     }
     return errors;
   };
@@ -181,7 +181,7 @@ export const Clients = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
         <h1 className="text-3xl font-bold">Clients</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Client</span>

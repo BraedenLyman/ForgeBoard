@@ -35,7 +35,7 @@ export const clientSchema = z.object({
   notes: z
     .string()
     .max(150, 'Notes must be 150 characters or fewer')
-    .regex(/^[A-Za-z0-9 .,\-?!()]+$/, 'Notes may only include letters, numbers, spaces, and . , - ? ! ( )')
+    .regex(/^[A-Za-z0-9 .!?$#%(),'" ]+$/, 'Notes may only include letters, numbers, spaces, and . ! ? $ # % ( ) , \' "')
     .optional()
     .or(z.literal('')),
   tags: z.array(z.string()).optional(),
@@ -61,14 +61,23 @@ export const leadSchema = z.object({
   notes: z
     .string()
     .max(150, 'Notes must be 150 characters or fewer')
-    .regex(/^[A-Za-z0-9. ]+$/, 'Notes may only include letters, numbers, spaces, and periods')
-    .optional(),
+    .regex(/^[A-Za-z0-9 .!?$#%(),'" ]+$/, 'Notes may only include letters, numbers, spaces, and . ! ? $ # % ( ) , \' "')
+    .optional()
+    .or(z.literal('')),
 });
 
 export const projectSchema = z.object({
   clientId: z.string(),
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required')
+    .regex(/^[A-Za-z0-9 ]+$/, 'Title may only include letters, numbers, and spaces'),
+  description: z
+    .string()
+    .regex(/^[A-Za-z0-9 .!?$#%(),'" ]+$/, 'Description contains invalid characters')
+    .optional()
+    .or(z.literal('')),
   status: z.enum(['active', 'paused', 'completed']).optional(),
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
@@ -90,7 +99,9 @@ export const invoiceSchema = z.object({
   projectId: z.string().optional(),
   lineItems: z.array(
     z.object({
-      description: z.string(),
+      description: z
+        .string()
+        .regex(/^[A-Za-z0-9 .!?$#%(),'" ]+$/, 'Description contains invalid characters'),
       qty: z.number().min(1),
       unitPriceCents: z.number().min(0),
     })

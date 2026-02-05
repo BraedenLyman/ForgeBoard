@@ -17,3 +17,12 @@ a {
 button:disabled {
   @apply opacity-50 cursor-not-allowed;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -25,7 +25,7 @@ export const Leads = () => {
 
   const leadTitleRegex = /^[A-Za-z0-9 ]+$/;
   const leadSourceRegex = /^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+$/;
-  const leadNotesRegex = /^[A-Za-z0-9. ]+$/;
+  const leadNotesRegex = /^[A-Za-z0-9 .!?$#%(),'" ]+$/;
   const sanitizeNumericInput = (raw) => {
     const cleaned = raw.replace(/[^0-9.]/g, '');
     const parts = cleaned.split('.');
@@ -33,7 +33,7 @@ export const Leads = () => {
     return `${parts.shift()}.${parts.join('')}`;
   };
   const sanitizeSourceInput = (raw) => raw.replace(/[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+/g, '');
-  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9. ]+/g, '').slice(0, 150);
+  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9 .!?$#%(),'" ]+/g, '').slice(0, 150);
 
   const validateLead = (data) => {
     const errors = {};
@@ -47,7 +47,7 @@ export const Leads = () => {
     }
     if (!data.source || !String(data.source).trim()) errors.source = 'Source is required';
     if (data.notes && (!leadNotesRegex.test(String(data.notes)) || String(data.notes).length > 150)) {
-      errors.notes = 'Notes may only include letters, numbers, spaces, and periods (max 150 chars)';
+      errors.notes = 'Notes may only include letters, numbers, spaces, and . ! ? $ # % ( ) , \' " (max 150 chars)';
     }
     return errors;
   };
@@ -141,7 +141,7 @@ export const Leads = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
         <h1 className="text-3xl font-bold">Leads Pipeline</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Lead</span>
