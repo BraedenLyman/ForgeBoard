@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Button, Card, Loading, Error, Modal, Input, Badge } from '../components/UI.jsx';
+import { Button, Card, Loading, Error, Modal, Input, Popover } from '../components/UI.jsx';
 import { api } from '../utils/api.js';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2, Edit2, Info } from 'lucide-react';
+import { useRef } from 'react';
 
 const stages = ['lead', 'contacted', 'proposal', 'won', 'lost'];
 
@@ -12,10 +13,13 @@ export const Leads = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    valueCents: 0,
+    value: 0,
     source: 'direct',
     notes: '',
   });
+  const [deleteModal, setDeleteModal] = useState({ open: false, leadId: null });
+  const [editModal, setEditModal] = useState({ open: false, lead: null });
+  const [infoPopover, setInfoPopover] = useState({ open: false, lead: null, anchor: null });
 
   useEffect(() => {
     loadLeads();
@@ -35,12 +39,44 @@ export const Leads = () => {
   const handleCreateLead = async (e) => {
     e.preventDefault();
     try {
-      await api.leads.create(formData);
+      await api.leads.create({
+        ...formData,
+        valueCents: Math.round(formData.value * 100),
+      });
       setIsModalOpen(false);
-      setFormData({ title: '', valueCents: 0, source: 'direct', notes: '' });
+      setFormData({ title: '', value: 0, source: 'direct', notes: '' });
       loadLeads();
     } catch (err) {
       setError(err.error?.message || 'Failed to create lead');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.leads.delete(id);
+      setDeleteModal({ open: false, leadId: null });
+      loadLeads();
+    } catch (err) {
+      setError(err.error?.message || 'Failed to delete lead');
+    }
+  };
+
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    try {
+      // Ensure value is a number
+      const value = typeof editModal.lead.value === 'string' ? parseFloat(editModal.lead.value) : editModal.lead.value;
+      await api.leads.update(editModal.lead._id, {
+        title: editModal.lead.title,
+        valueCents: Math.round(Number(value) * 100),
+        source: editModal.lead.source,
+        notes: editModal.lead.notes,
+        stage: editModal.lead.stage,
+      });
+      setEditModal({ open: false, lead: null });
+      loadLeads();
+    } catch (err) {
+      setError(err.error?.message || 'Failed to update lead');
     }
   };
 
@@ -65,7 +101,7 @@ export const Leads = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Leads Pipeline</h1>
         <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" /> New Lead
+          <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Lead</span>
         </Button>
       </div>
 
@@ -80,10 +116,13 @@ export const Leads = () => {
             required
           />
           <Input
-            label="Value (cents)"
+            label="Value ($)"
             type="number"
-            value={formData.valueCents}
-            onChange={(e) => setFormData({ ...formData, valueCents: parseInt(e.target.value) })}
+            value={formData.value}
+            min={0}
+            step={0.01}
+            onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) })}
+            required
           />
           <Input
             label="Source"
@@ -101,32 +140,138 @@ export const Leads = () => {
         </form>
       </Modal>
 
+      {/* Delete Modal */}
+      <Modal isOpen={deleteModal.open} onClose={() => setDeleteModal({ open: false, leadId: null })} title="Delete Lead?">
+        <div className="mb-4">Are you sure you want to delete this lead? This action cannot be undone.</div>
+        <div className="flex gap-2">
+          <Button variant="danger" onClick={() => handleDelete(deleteModal.leadId)}>
+            Delete
+          </Button>
+          <Button variant="secondary" onClick={() => setDeleteModal({ open: false, leadId: null })}>
+            Cancel
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal isOpen={editModal.open} onClose={() => setEditModal({ open: false, lead: null })} title="Edit Lead">
+        {editModal.lead && (
+          <form onSubmit={handleEdit}>
+            <Input
+              label="Title"
+              value={editModal.lead.title}
+              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, title: e.target.value } })}
+              required
+            />
+            <Input
+              label="Value ($)"
+              type="number"
+              value={editModal.lead.value}
+              min={0}
+              step={0.01}
+              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, value: parseFloat(e.target.value) } })}
+              required
+            />
+            <Input
+              label="Source"
+              value={editModal.lead.source}
+              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, source: e.target.value } })}         
+            />
+            <Input
+              label="Notes"
+              value={editModal.lead.notes}
+              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, notes: e.target.value } })}
+            />
+            <select
+              className="w-full mb-4 px-2 py-1 border rounded text-sm"
+              value={editModal.lead.stage}
+              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, stage: e.target.value } })}
+            >
+              {stages.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <Button type="submit" className="w-full">
+              Save Changes
+            </Button>
+          </form>
+        )}
+      </Modal>
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {stages.map((stage) => (
-          <div key={stage}>
-            <h2 className="font-bold text-lg mb-4 capitalize">{stage}</h2>
-            <div className="space-y-2">
+          <Card key={stage} className="p-0 flex flex-col">
+            <div className="bg-slate-100 px-4 py-3 rounded-t-lg border-b">
+              <h2 className="font-bold text-lg capitalize text-center">{stage}</h2>
+            </div>
+            <div className="flex-1 divide-y">
+              {leadsByStage[stage].length === 0 && (
+                <div className="p-4 text-slate-400 text-center">No leads</div>
+              )}
               {leadsByStage[stage].map((lead) => (
-                <Card key={lead._id} className="cursor-pointer hover:shadow-lg transition">
-                  <h3 className="font-medium mb-2">{lead.title}</h3>
-                  <p className="text-sm text-slate-600 mb-3">
-                    ${(lead.valueCents / 100).toFixed(0)}
-                  </p>
+                <div key={lead._id} className="flex flex-col gap-1 px-4 py-3 hover:bg-slate-50 group">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-slate-800">{lead.title}</span>
+                    <div className="flex gap-2">
+                      <button
+                        ref={el => {
+                          if (infoPopover.open && infoPopover.lead && infoPopover.lead._id === lead._id) infoPopover.anchor = el;
+                        }}
+                        onClick={e => setInfoPopover({ open: true, lead, anchor: e.currentTarget })}
+                        className="text-slate-500 opacity-0 group-hover:opacity-100 transition"
+                        title="View Info"
+                        type="button"
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditModal({ open: true, lead: { ...lead, value: (lead.valueCents / 100).toFixed(2) } })}
+                        className="text-blue-500 opacity-0 group-hover:opacity-100 transition"
+                        title="Edit Lead"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setDeleteModal({ open: true, leadId: lead._id })}
+                        className="text-red-500 opacity-0 group-hover:opacity-100 transition"
+                        title="Delete Lead"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <Popover
+                      open={infoPopover.open}
+                      anchorRef={{ current: infoPopover.anchor }}
+                      onClose={() => setInfoPopover({ open: false, lead: null, anchor: null })}
+                    >
+                      {infoPopover.lead && (
+                        <div className="space-y-2">
+                          <div><span className="font-bold">Title:</span> {infoPopover.lead.title}</div>
+                          <div><span className="font-bold">Value:</span> ${ (infoPopover.lead.valueCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</div>
+                          <div><span className="font-bold">Source:</span> {infoPopover.lead.source}</div>
+                          <div><span className="font-bold">Stage:</span> {infoPopover.lead.stage}</div>
+                          <div><span className="font-bold">Notes:</span> {infoPopover.lead.notes || <span className="italic text-slate-400">None</span>}</div>
+                        </div>
+                      )}
+                    </Popover>
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-slate-500">
+                    <span>Value: ${ (lead.valueCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }</span>
+                    <span>Source: {lead.source}</span>
+                  </div>
                   <select
-                    className="w-full px-2 py-1 border rounded text-sm"
-                    value={stage}
+                    className="w-full mt-2 px-2 py-1 border rounded text-sm"
+                    value={lead.stage}
                     onChange={(e) => handleStageChange(lead._id, e.target.value)}
                   >
                     {stages.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
-                </Card>
+                </div>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

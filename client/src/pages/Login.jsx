@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Error, Card } from '../components/UI.jsx';
-import { api } from '../utils/api.js';
+import { useAuth } from '../hooks/useAuth.js';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,7 +18,7 @@ export const Login = () => {
     setIsLoading(true);
 
     try {
-      await api.auth.login({ email, password });
+      await login(email, password);
       navigate('/app');
     } catch (err) {
       setError(err.error?.message || 'Login failed');

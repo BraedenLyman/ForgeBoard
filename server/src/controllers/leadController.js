@@ -49,6 +49,24 @@ export const updateLeadStage = asyncHandler(async (req, res) => {
   res.json(lead);
 });
 
+export const updateLead = asyncHandler(async (req, res) => {
+  const data = leadSchema.partial().parse(req.body);
+
+  const lead = await Lead.findOneAndUpdate(
+    { _id: req.params.id, ownerUserId: req.userId },
+    data,
+    { new: true, runValidators: true }
+  );
+
+  if (!lead) {
+    return res.status(404).json({
+      error: { code: 'NOT_FOUND', message: 'Lead not found' },
+    });
+  }
+
+  res.json(lead);
+});
+
 export const deleteLead = asyncHandler(async (req, res) => {
   const lead = await Lead.findOneAndDelete({
     _id: req.params.id,

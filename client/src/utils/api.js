@@ -42,6 +42,7 @@ export const api = {
       return apiRequest(`/leads?${query}`);
     },
     create: (data) => apiRequest('/leads', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id, data) => apiRequest(`/leads/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     updateStage: (id, stage) => apiRequest(`/leads/${id}/stage`, { method: 'PATCH', body: JSON.stringify({ stage }) }),
     delete: (id) => apiRequest(`/leads/${id}`, { method: 'DELETE' }),
   },

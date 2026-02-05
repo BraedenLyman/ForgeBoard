@@ -107,7 +107,7 @@ export const Invoices = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Invoices</h1>
         <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" /> New Invoice
+          <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Invoice</span>
         </Button>
       </div>
 

@@ -1,3 +1,45 @@
+import { useRef, useEffect, useState } from 'react';
+
+export const Popover = ({ open, anchorRef, onClose, children, className = '' }) => {
+  const popoverRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e) {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(e.target) &&
+        (!anchorRef.current || !anchorRef.current.contains(e.target))
+      ) {
+        onClose();
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open, onClose, anchorRef]);
+
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  useEffect(() => {
+    if (open && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, [open, anchorRef]);
+
+  if (!open) return null;
+  return (
+    <div
+      ref={popoverRef}
+      className={`absolute z-50 bg-white border border-slate-200 rounded-lg shadow-lg p-4 min-w-[220px] ${className}`}
+      style={{ top: pos.top, left: pos.left }}
+    >
+      {children}
+    </div>
+  );
+};
 export const Button = ({ children, variant = 'primary', disabled, ...props }) => {
   const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-colors';
   const variants = {

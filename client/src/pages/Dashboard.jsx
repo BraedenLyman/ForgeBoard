@@ -41,14 +41,22 @@ export const Dashboard = () => {
   const pendingInvoices = invoices.filter((i) => i.status !== 'paid').length;
   const wonLeads = leads.filter((l) => l.stage === 'won').length;
 
-  const chartData = [
-    { month: 'Jan', revenue: 5000 },
-    { month: 'Feb', revenue: 8000 },
-    { month: 'Mar', revenue: 6500 },
-    { month: 'Apr', revenue: 9200 },
-    { month: 'May', revenue: 7800 },
-    { month: 'Jun', revenue: 12000 },
-  ];
+  // Generate chart data from invoices
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Get current year
+  const currentYear = new Date().getFullYear();
+  // Initialize revenue per month
+  const revenueByMonth = Array(12).fill(0);
+  invoices.filter(i => i.status === 'paid').forEach(inv => {
+    const date = new Date(inv.paidDate || inv.issueDate);
+    if (date.getFullYear() === currentYear) {
+      revenueByMonth[date.getMonth()] += inv.totalCents;
+    }
+  });
+  const chartData = monthNames.map((month, idx) => ({
+    month,
+    revenue: Number((revenueByMonth[idx] / 100).toFixed(2)),
+  }));
 
   return (
     <div className="container mx-auto px-4 py-8">
