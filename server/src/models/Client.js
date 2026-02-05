@@ -21,7 +21,10 @@ const clientSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 150,
-      match: [/^[A-Za-z0-9 .,\-?!()]+$/, 'Notes may only include letters, numbers, spaces, and . , - ? ! ( )'],
+      validate: {
+        validator: (value) => !value || /^[A-Za-z0-9 .,\-?!()]+$/.test(value),
+        message: 'Notes may only include letters, numbers, spaces, and . , - ? ! ( )',
+      },
     },
     tags: [String],
   },

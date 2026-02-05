@@ -35,19 +35,32 @@ export const createInvoice = asyncHandler(async (req, res) => {
     0
   );
 
-  const number = await generateInvoiceNumber(req.userId);
+  let lastError;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const number = await generateInvoiceNumber(req.userId);
 
-  const invoice = new Invoice({
-    ...data,
-    ownerUserId: req.userId,
-    number,
-    totalCents,
-    issueDate: new Date(data.issueDate),
-    dueDate: new Date(data.dueDate),
-  });
+      const invoice = new Invoice({
+        ...data,
+        ownerUserId: req.userId,
+        number,
+        totalCents,
+        issueDate: new Date(data.issueDate),
+        dueDate: new Date(data.dueDate),
+      });
 
-  await invoice.save();
-  res.status(201).json(invoice);
+      await invoice.save();
+      return res.status(201).json(invoice);
+    } catch (err) {
+      if (err?.code === 11000) {
+        lastError = err;
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError;
 });
 
 export const getInvoiceDetail = asyncHandler(async (req, res) => {

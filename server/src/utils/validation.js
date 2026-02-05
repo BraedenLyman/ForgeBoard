@@ -36,7 +36,8 @@ export const clientSchema = z.object({
     .string()
     .max(150, 'Notes must be 150 characters or fewer')
     .regex(/^[A-Za-z0-9 .,\-?!()]+$/, 'Notes may only include letters, numbers, spaces, and . , - ? ! ( )')
-    .optional(),
+    .optional()
+    .or(z.literal('')),
   tags: z.array(z.string()).optional(),
 });
 

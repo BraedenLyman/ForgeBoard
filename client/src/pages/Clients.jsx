@@ -234,7 +234,7 @@ export const Clients = () => {
                 setFormErrors({ ...formErrors, company: '' });
               }
             }}
-            pattern="[A-Za-z0-9 -]+"
+            pattern="[A-Za-z0-9 \\-]+"
             required
           />
           <Input
@@ -303,7 +303,7 @@ export const Clients = () => {
                   setEditErrors({ ...editErrors, company: '' });
                 }
               }}
-              pattern="[A-Za-z0-9 -]+"
+              pattern="[A-Za-z0-9 \\-]+"
               required
             />
             <Input

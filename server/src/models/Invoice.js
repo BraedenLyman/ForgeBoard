@@ -11,7 +11,7 @@ const invoiceSchema = new mongoose.Schema(
     ownerUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
     projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' },
-    number: { type: String, required: true, unique: true },
+    number: { type: String, required: true },
     status: {
       type: String,
       enum: ['draft', 'sent', 'paid'],
@@ -26,5 +26,7 @@ const invoiceSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+invoiceSchema.index({ ownerUserId: 1, number: 1 }, { unique: true });
 
 export default mongoose.model('Invoice', invoiceSchema);
