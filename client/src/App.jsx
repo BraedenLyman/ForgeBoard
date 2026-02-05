@@ -133,7 +133,7 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/ForgeBoard">
       <AuthProvider>
         <AppContent />
       </AuthProvider>
