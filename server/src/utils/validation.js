@@ -14,11 +14,29 @@ export const loginSchema = z.object({
 });
 
 export const clientSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Name is required')
+    .regex(/^[A-Za-z ]+$/, 'Name may only include letters and spaces'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .regex(
+      /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/,
+      'Invalid email'
+    ),
   phone: z.string().optional(),
-  company: z.string().optional(),
-  notes: z.string().optional(),
+  company: z
+    .string()
+    .trim()
+    .min(1, 'Company is required')
+    .regex(/^[A-Za-z0-9 -]+$/, 'Company may only include letters, numbers, dashes, and spaces'),
+  notes: z
+    .string()
+    .max(150, 'Notes must be 150 characters or fewer')
+    .regex(/^[A-Za-z0-9 .,\-?!()]+$/, 'Notes may only include letters, numbers, spaces, and . , - ? ! ( )')
+    .optional(),
   tags: z.array(z.string()).optional(),
 });
 

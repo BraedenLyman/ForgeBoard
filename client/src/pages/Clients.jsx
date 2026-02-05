@@ -14,7 +14,7 @@ const formatPhone = (value) => {
 
 const isValidEmail = (value) => {
   if (!value) return true;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  return /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(value);
 };
 
 export const Clients = () => {
@@ -22,7 +22,8 @@ export const Clients = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [emailError, setEmailError] = useState('');
+  const [formErrors, setFormErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
   const [formError, setFormError] = useState('');
   const [editModal, setEditModal] = useState({ open: false, client: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, clientId: null });
@@ -50,17 +51,47 @@ export const Clients = () => {
     }
   };
 
+  const clientNameRegex = /^[A-Za-z ]+$/;
+  const companyNameRegex = /^[A-Za-z0-9 -]+$/;
+  const clientNotesRegex = /^[A-Za-z0-9 .,\-?!()]+$/;
+  const sanitizeNameInput = (raw) => raw.replace(/[^A-Za-z ]+/g, '');
+  const sanitizeCompanyInput = (raw) => raw.replace(/[^A-Za-z0-9 -]+/g, '');
+  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9 .,\-?!()]+/g, '').slice(0, 150);
+
+  const validateClient = (data) => {
+    const errors = {};
+    if (!data.name || !String(data.name).trim()) {
+      errors.name = 'Name is required';
+    } else if (!clientNameRegex.test(String(data.name).trim())) {
+      errors.name = 'Name may only include letters and spaces';
+    }
+    if (!data.email || !String(data.email).trim()) {
+      errors.email = 'Email is required';
+    } else if (!isValidEmail(data.email)) {
+      errors.email = 'Enter a valid email address';
+    }
+    if (!data.company || !String(data.company).trim()) errors.company = 'Company is required';
+    else if (!companyNameRegex.test(String(data.company).trim())) {
+      errors.company = 'Company may only include letters, numbers, dashes, and spaces';
+    }
+    if (data.notes && (!clientNotesRegex.test(String(data.notes)) || String(data.notes).length > 150)) {
+      errors.notes = 'Notes may only include letters, numbers, spaces, and . , - ? ! ( ) (max 150 chars)';
+    }
+    return errors;
+  };
+
   const handleCreateClient = async (e) => {
     e.preventDefault();
-    if (!isValidEmail(formData.email)) {
-      setEmailError('Enter a valid email address');
+    const errors = validateClient(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
     try {
       await api.clients.create(formData);
       setIsModalOpen(false);
       setFormData({ name: '', email: '', phone: '', company: '', notes: '' });
-      setEmailError('');
+      setFormErrors({});
       setFormError('');
       loadClients();
     } catch (err) {
@@ -80,8 +111,9 @@ export const Clients = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    if (!isValidEmail(editModal.client.email)) {
-      setEmailError('Enter a valid email address');
+    const errors = validateClient(editModal.client);
+    if (Object.keys(errors).length > 0) {
+      setEditErrors(errors);
       return;
     }
     try {
@@ -93,7 +125,7 @@ export const Clients = () => {
         notes: editModal.client.notes,
       });
       setEditModal({ open: false, client: null });
-      setEmailError('');
+      setEditErrors({});
       setFormError('');
       loadClients();
     } catch (err) {
@@ -161,36 +193,62 @@ export const Clients = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Client">
         <form onSubmit={handleCreateClient}>
           <Input
-            label="Name"
+            label="Name *"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            error={formErrors.name}
+            onChange={(e) => {
+              const value = sanitizeNameInput(e.target.value);
+              setFormData({ ...formData, name: value });
+              if (formErrors.name && String(value).trim() && clientNameRegex.test(String(value).trim())) {
+                setFormErrors({ ...formErrors, name: '' });
+              }
+            }}
+            pattern="[A-Za-z ]+"
             required
           />
           <Input
-            label="Email"
+            label="Email *"
             type="email"
             value={formData.email}
-            error={emailError}
+            error={formErrors.email}
             onChange={(e) => {
               const value = e.target.value;
               setFormData({ ...formData, email: value });
-              if (emailError && isValidEmail(value)) setEmailError('');
+              if (formErrors.email && isValidEmail(value)) setFormErrors({ ...formErrors, email: '' });
             }}
+            required
           />
           <Input
-            label="Phone"
+            label="Phone (optional)"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
           />
           <Input
-            label="Company"
+            label="Company *"
             value={formData.company}
-            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            error={formErrors.company}
+            onChange={(e) => {
+              const value = sanitizeCompanyInput(e.target.value);
+              setFormData({ ...formData, company: value });
+              if (formErrors.company && String(value).trim() && companyNameRegex.test(String(value).trim())) {
+                setFormErrors({ ...formErrors, company: '' });
+              }
+            }}
+            pattern="[A-Za-z0-9 -]+"
+            required
           />
           <Input
-            label="Notes"
+            label="Notes (optional)"
             value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            error={formErrors.notes}
+            onChange={(e) => {
+              const value = sanitizeNotesInput(e.target.value);
+              setFormData({ ...formData, notes: value });
+              if (formErrors.notes && clientNotesRegex.test(String(value)) && String(value).length <= 150) {
+                setFormErrors({ ...formErrors, notes: '' });
+              }
+            }}
+            maxLength={150}
           />
           {formError && <div className="text-red-500 text-sm mb-4">{formError}</div>}
           <Button type="submit" className="w-full">
@@ -204,36 +262,62 @@ export const Clients = () => {
         {editModal.client && (
           <form onSubmit={handleEdit}>
             <Input
-              label="Name"
+              label="Name *"
               value={editModal.client.name}
-              onChange={(e) => setEditModal({ ...editModal, client: { ...editModal.client, name: e.target.value } })}
+              error={editErrors.name}
+              onChange={(e) => {
+                const value = sanitizeNameInput(e.target.value);
+                setEditModal({ ...editModal, client: { ...editModal.client, name: value } });
+                if (editErrors.name && String(value).trim() && clientNameRegex.test(String(value).trim())) {
+                  setEditErrors({ ...editErrors, name: '' });
+                }
+              }}
+              pattern="[A-Za-z ]+"
               required
             />
             <Input
-              label="Email"
+              label="Email *"
               type="email"
               value={editModal.client.email}
-              error={emailError}
+              error={editErrors.email}
               onChange={(e) => {
                 const value = e.target.value;
                 setEditModal({ ...editModal, client: { ...editModal.client, email: value } });
-                if (emailError && isValidEmail(value)) setEmailError('');
+                if (editErrors.email && isValidEmail(value)) setEditErrors({ ...editErrors, email: '' });
               }}
+              required
             />
             <Input
-              label="Phone"
+              label="Phone (optional)"
               value={editModal.client.phone}
               onChange={(e) => setEditModal({ ...editModal, client: { ...editModal.client, phone: formatPhone(e.target.value) } })}
             />
             <Input
-              label="Company"
+              label="Company *"
               value={editModal.client.company}
-              onChange={(e) => setEditModal({ ...editModal, client: { ...editModal.client, company: e.target.value } })}
+              error={editErrors.company}
+              onChange={(e) => {
+                const value = sanitizeCompanyInput(e.target.value);
+                setEditModal({ ...editModal, client: { ...editModal.client, company: value } });
+                if (editErrors.company && String(value).trim() && companyNameRegex.test(String(value).trim())) {
+                  setEditErrors({ ...editErrors, company: '' });
+                }
+              }}
+              pattern="[A-Za-z0-9 -]+"
+              required
             />
             <Input
-              label="Notes"
+              label="Notes (optional)"
               value={editModal.client.notes}
-              onChange={(e) => setEditModal({ ...editModal, client: { ...editModal.client, notes: e.target.value } })}
+              error={editErrors.notes}
+              onChange={(e) => {
+                const value = sanitizeNotesInput(e.target.value);
+                setEditModal({ ...editModal, client: { ...editModal.client, notes: value } });
+                if (editErrors.notes && clientNotesRegex.test(String(value)) && String(value).length <= 150) {
+                  setEditErrors({ ...editErrors, notes: '' });
+                }
+              }}
+              maxLength={150}
             />
             {formError && <div className="text-red-500 text-sm mb-4">{formError}</div>}
             <Button type="submit" className="w-full">
