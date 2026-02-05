@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 import { Button } from '../components/UI.jsx';
 import { TrendingUp, Zap, BarChart3, Clock } from 'lucide-react';
+import iconLogo from '../assets/forgeboardicontrans.png';
 
 export const Landing = () => {
   const navigate = useNavigate();
@@ -13,7 +14,10 @@ export const Landing = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100">
       <div className="container mx-auto px-4 py-12 sm:py-16 lg:py-20">
         <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16 lg:mb-20">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+          <div className="flex justify-center">
+            <img src={iconLogo} alt="ForgeBoard" className="h-[170px] sm:h-[200px] w-auto max-w-full" />
+          </div>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Freelancer Success Starts Here
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-slate-600 mb-6 sm:mb-8">
@@ -54,7 +58,7 @@ export const Landing = () => {
           <p className="text-slate-600 mb-5 sm:mb-6">
             Join hundreds of freelancers using ForgeBoard
           </p>
-          <Button onClick={() => navigate('/register')} className="px-6 py-3 sm:px-8 w-full sm:w-auto">
+          <Button onClick={() => navigate('/register')} className="px-4 py-3 sm:px-8 w-full sm:w-auto">
             Start Your Free Trial
           </Button>
         </div>

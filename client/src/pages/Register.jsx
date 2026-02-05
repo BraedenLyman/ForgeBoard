@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Error, Card } from '../components/UI.jsx';
 import { api } from '../utils/api.js';
+import logo from '../assets/logo.png';
 
 export const Register = () => {
   const [name, setName] = useState('');
@@ -45,7 +46,9 @@ export const Register = () => {
           ← Back
         </button>
         <div className="text-center mb-6">
-          <div className="text-2xl sm:text-3xl font-bold text-blue-600">ForgeBoard</div>
+          <div className="flex justify-center mb-7">
+            <img src={logo} alt="ForgeBoard" className="h-[48px] sm:h-[56px] w-auto max-w-full" />
+          </div>
           <h1 className="text-xl sm:text-2xl font-semibold mt-2">Create Account</h1>
           <p className="text-slate-500 text-sm sm:text-base mt-1">
             Start organizing your freelance business in minutes.
