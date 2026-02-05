@@ -181,8 +181,8 @@ export const Clients = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-3xl font-bold">Clients</h1>
+      <div className="sticky top-16 z-40 -mx-4 px-4 pt-4 pb-3 bg-slate-50/95 backdrop-blur border-b flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-3xl font-bold text-center sm:text-left">Clients</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Client</span>
         </Button>
@@ -344,6 +344,7 @@ export const Clients = () => {
         open={infoPopover.open}
         anchorRef={{ current: infoPopover.anchor }}
         onClose={() => setInfoPopover({ open: false, client: null, anchor: null })}
+        centerOnMobile
       >
         {infoPopover.client && (
           <div className="space-y-2">
@@ -356,7 +357,51 @@ export const Clients = () => {
         )}
       </Popover>
 
-      <Card>
+      <div className="md:hidden space-y-4">
+        {clients.map((client) => (
+          <Card key={client._id} className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold text-slate-900">{client.name}</div>
+              <div className="flex gap-2 items-center">
+                <button
+                  ref={el => {
+                    if (infoPopover.open && infoPopover.client && infoPopover.client._id === client._id) infoPopover.anchor = el;
+                  }}
+                  onClick={(e) => setInfoPopover({ open: true, client, anchor: e.currentTarget })}
+                  className="text-slate-500 hover:text-slate-700"
+                  title="View Info"
+                  type="button"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setEditModal({ open: true, client: { ...client, phone: formatPhone(client.phone) } })}
+                  className="text-blue-600 hover:text-blue-700"
+                  title="Edit Client"
+                  type="button"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDeleteModal({ open: true, clientId: client._id })}
+                  className="text-red-600 hover:text-red-700"
+                  title="Delete Client"
+                  type="button"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="text-sm text-slate-600">
+              <div><span className="font-medium text-slate-800">Email:</span> {client.email || 'N/A'}</div>
+              <div><span className="font-medium text-slate-800">Phone:</span> {formatPhone(client.phone) || 'N/A'}</div>
+              <div><span className="font-medium text-slate-800">Company:</span> {client.company || 'N/A'}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="hidden md:block">
         <Table columns={columns} data={clients} />
       </Card>
     </div>

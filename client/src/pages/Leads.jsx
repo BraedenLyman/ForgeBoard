@@ -141,8 +141,8 @@ export const Leads = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-3xl font-bold">Leads Pipeline</h1>
+      <div className="sticky top-16 z-40 -mx-4 px-4 pt-4 pb-3 bg-slate-50/95 backdrop-blur border-b flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-3xl font-bold text-center sm:text-left">Leads Pipeline</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Lead</span>
         </Button>
@@ -294,7 +294,7 @@ export const Leads = () => {
               maxLength={150}
             />
             <select
-              className="w-full mb-4 px-2 py-1 border rounded text-sm"
+              className="w-full mb-4 px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={editModal.lead.stage}
               onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, stage: e.target.value } })}
             >
@@ -311,11 +311,11 @@ export const Leads = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {stages.map((stage) => (
-          <Card key={stage} className="p-0 flex flex-col">
+          <Card key={stage} className="p-0 flex flex-col md:h-[70vh]">
             <div className="bg-slate-100 px-4 py-3 rounded-t-lg border-b">
               <h2 className="font-bold text-lg capitalize text-center">{stage}</h2>
             </div>
-            <div className="flex-1 divide-y">
+            <div className="flex-1 divide-y md:overflow-y-auto no-scrollbar">
               {leadsByStage[stage].length === 0 && (
                 <div className="p-4 text-slate-400 text-center">No leads</div>
               )}
@@ -354,6 +354,7 @@ export const Leads = () => {
                       open={infoPopover.open}
                       anchorRef={{ current: infoPopover.anchor }}
                       onClose={() => setInfoPopover({ open: false, lead: null, anchor: null })}
+                      centerOnMobile
                     >
                       {infoPopover.lead && (
                         <div className="space-y-2">
@@ -371,7 +372,7 @@ export const Leads = () => {
                     <span>Source: {lead.source}</span>
                   </div>
                   <select
-                    className="w-full mt-2 px-2 py-1 border rounded text-sm"
+                    className="w-full mt-2 px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={lead.stage}
                     onChange={(e) => handleStageChange(lead._id, e.target.value)}
                   >

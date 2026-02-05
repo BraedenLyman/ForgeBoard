@@ -71,7 +71,10 @@ export const InvoiceDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <p className="text-slate-600">Status</p>
-          <Badge color={invoice.status === 'paid' ? 'green' : 'yellow'} className="text-lg">
+          <Badge
+            color={invoice.status === 'paid' ? 'green' : invoice.status === 'sent' ? 'yellow' : 'blue'}
+            className="text-lg"
+          >
             {invoice.status.toUpperCase()}
           </Badge>
         </Card>
@@ -104,32 +107,53 @@ export const InvoiceDetail = () => {
 
       <Card>
         <h2 className="text-xl font-bold mb-4">Line Items</h2>
-        <table className="w-full text-sm">
-          <thead className="border-b">
-            <tr>
-              <th className="text-left py-2">Description</th>
-              <th className="text-right py-2">Qty</th>
-              <th className="text-right py-2">Unit Price</th>
-              <th className="text-right py-2">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.lineItems.map((item, idx) => (
-              <tr key={idx} className="border-b">
-                <td className="py-2">{item.description}</td>
-                <td className="text-right">{item.qty}</td>
-                <td className="text-right">${(item.unitPriceCents / 100).toFixed(2)}</td>
-                <td className="text-right font-medium">
+
+        <div className="md:hidden space-y-3">
+          {invoice.lineItems.map((item, idx) => (
+            <div key={idx} className="border border-slate-200 rounded-lg p-3">
+              <div className="font-medium text-slate-900 mb-2">{item.description}</div>
+              <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
+                <div><span className="font-medium text-slate-800">Qty:</span> {item.qty}</div>
+                <div><span className="font-medium text-slate-800">Unit:</span> ${(item.unitPriceCents / 100).toFixed(2)}</div>
+                <div className="col-span-2 text-right font-semibold text-slate-900">
                   ${((item.qty * item.unitPriceCents) / 100).toFixed(2)}
-                </td>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className="border-t pt-3 text-right">
+            <p className="text-base font-bold">Total: ${(invoice.totalCents / 100).toFixed(2)}</p>
+          </div>
+        </div>
+
+        <div className="hidden md:block">
+          <table className="w-full text-sm">
+            <thead className="border-b">
+              <tr>
+                <th className="text-left py-2">Description</th>
+                <th className="text-right py-2">Qty</th>
+                <th className="text-right py-2">Unit Price</th>
+                <th className="text-right py-2">Amount</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="border-t pt-4 mt-4 text-right">
-          <p className="text-lg font-bold">
-            Total: ${(invoice.totalCents / 100).toFixed(2)}
-          </p>
+            </thead>
+            <tbody>
+              {invoice.lineItems.map((item, idx) => (
+                <tr key={idx} className="border-b">
+                  <td className="py-2">{item.description}</td>
+                  <td className="text-right">{item.qty}</td>
+                  <td className="text-right">${(item.unitPriceCents / 100).toFixed(2)}</td>
+                  <td className="text-right font-medium">
+                    ${((item.qty * item.unitPriceCents) / 100).toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="border-t pt-4 mt-4 text-right">
+            <p className="text-lg font-bold">
+              Total: ${(invoice.totalCents / 100).toFixed(2)}
+            </p>
+          </div>
         </div>
       </Card>
     </div>

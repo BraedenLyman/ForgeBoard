@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 
-export const Popover = ({ open, anchorRef, onClose, children, className = '' }) => {
+export const Popover = ({ open, anchorRef, onClose, children, className = '', centerOnMobile = false }) => {
   const popoverRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -18,18 +19,39 @@ export const Popover = ({ open, anchorRef, onClose, children, className = '' }) 
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open, onClose, anchorRef]);
 
+  useEffect(() => {
+    if (!centerOnMobile) return;
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [centerOnMobile]);
+
   const [pos, setPos] = useState({ top: 0, left: 0 });
   useEffect(() => {
-    if (open && anchorRef.current) {
+    if (open && anchorRef.current && !(centerOnMobile && isMobile)) {
       const rect = anchorRef.current.getBoundingClientRect();
       setPos({
         top: rect.bottom + window.scrollY + 8,
         left: rect.left + window.scrollX,
       });
     }
-  }, [open, anchorRef]);
+  }, [open, anchorRef, centerOnMobile, isMobile]);
 
   if (!open) return null;
+  if (centerOnMobile && isMobile) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+        <div
+          ref={popoverRef}
+          className={`relative bg-white border border-slate-200 rounded-lg shadow-lg p-4 max-w-[90vw] ${className}`}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       ref={popoverRef}

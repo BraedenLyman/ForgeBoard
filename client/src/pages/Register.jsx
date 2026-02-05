@@ -34,9 +34,23 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <Card className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center relative px-4 py-10">
+      <Card className="w-full max-w-md p-6 sm:p-8">
+        <button
+          onClick={() => navigate('/')}
+          className="text-slate-600 hover:text-blue-600 text-sm flex items-center mb-4"
+          type="button"
+          aria-label="Back to landing"
+        >
+          ← Back
+        </button>
+        <div className="text-center mb-6">
+          <div className="text-2xl sm:text-3xl font-bold text-blue-600">ForgeBoard</div>
+          <h1 className="text-xl sm:text-2xl font-semibold mt-2">Create Account</h1>
+          <p className="text-slate-500 text-sm sm:text-base mt-1">
+            Start organizing your freelance business in minutes.
+          </p>
+        </div>
 
         {error && <Error message={error} />}
 

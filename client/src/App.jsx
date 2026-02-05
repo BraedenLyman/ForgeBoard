@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { Navbar } from './components/Navbar.jsx';
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute.jsx';
@@ -17,12 +17,14 @@ import { Invoices } from './pages/Invoices.jsx';
 import { InvoiceDetail } from './pages/InvoiceDetail.jsx';
 import { Settings } from './pages/Settings.jsx';
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+
   return (
-    <Router>
-      <AuthProvider>
-        <Navbar />
-        <Routes>
+    <>
+      {!hideNavbar && <Navbar />}
+      <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route
@@ -115,7 +117,16 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
+      </Routes>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <AppContent />
       </AuthProvider>
     </Router>
   );

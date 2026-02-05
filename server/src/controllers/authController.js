@@ -1,6 +1,12 @@
 import User from '../models/User.js';
+import Client from '../models/Client.js';
+import Lead from '../models/Lead.js';
+import Project from '../models/Project.js';
+import Task from '../models/Task.js';
+import TimeLog from '../models/TimeLog.js';
+import Invoice from '../models/Invoice.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
-import { registerSchema, loginSchema } from '../utils/validation.js';
+import { registerSchema, loginSchema, updatePasswordSchema } from '../utils/validation.js';
 import { asyncHandler } from '../middleware/error.js';
 
 export const register = asyncHandler(async (req, res) => {
@@ -133,4 +139,45 @@ export const me = asyncHandler(async (req, res) => {
   }
 
   res.json(user);
+});
+
+export const updatePassword = asyncHandler(async (req, res) => {
+  const { newPassword } = updatePasswordSchema.parse(req.body);
+  const user = await User.findById(req.userId);
+
+  if (!user) {
+    return res.status(404).json({
+      error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+    });
+  }
+
+  user.passwordHash = newPassword;
+  await user.save();
+
+  res.json({ message: 'Password updated' });
+});
+
+export const deleteAccount = asyncHandler(async (req, res) => {
+  const userId = req.userId;
+
+  const projects = await Project.find({ ownerUserId: userId }).select('_id');
+  const projectIds = projects.map((p) => p._id);
+  if (projectIds.length > 0) {
+    await Promise.all([
+      Task.deleteMany({ projectId: { $in: projectIds } }),
+      TimeLog.deleteMany({ projectId: { $in: projectIds } }),
+    ]);
+  }
+
+  await Promise.all([
+    Client.deleteMany({ ownerUserId: userId }),
+    Lead.deleteMany({ ownerUserId: userId }),
+    Project.deleteMany({ ownerUserId: userId }),
+    Invoice.deleteMany({ ownerUserId: userId }),
+    User.findByIdAndDelete(userId),
+  ]);
+
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+  res.json({ message: 'Account deleted' });
 });

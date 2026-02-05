@@ -121,10 +121,13 @@ export const Dashboard = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="h-[320px] flex flex-col">
           <h2 className="text-xl font-bold mb-4">Recent Projects</h2>
-          <div className="space-y-2">
-            {projects.slice(0, 5).map((p) => (
+          <div className="space-y-2 flex-1 overflow-y-auto no-scrollbar">
+            {[...projects]
+              .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+              .slice(0, 3)
+              .map((p) => (
               <div key={p._id} className="flex justify-between items-center p-2 hover:bg-slate-50">
                 <span className="font-medium">{p.title}</span>
                 <span className="text-sm text-slate-500">{p.status}</span>
@@ -133,10 +136,13 @@ export const Dashboard = () => {
           </div>
         </Card>
 
-        <Card>
+        <Card className="h-[320px] flex flex-col">
           <h2 className="text-xl font-bold mb-4">Recent Invoices</h2>
-          <div className="space-y-2">
-            {invoices.slice(0, 5).map((i) => (
+          <div className="space-y-2 flex-1 overflow-y-auto no-scrollbar">
+            {[...invoices]
+              .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
+              .slice(0, 3)
+              .map((i) => (
               <div key={i._id} className="flex justify-between items-center p-2 hover:bg-slate-50">
                 <span className="font-medium">{i.number}</span>
                 <span className="text-sm text-slate-500">${(i.totalCents / 100).toFixed(0)}</span>

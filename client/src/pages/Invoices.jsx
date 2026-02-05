@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Loading, Error, Modal, Input, Table } from '../components/UI.jsx';
+import { Button, Card, Loading, Error, Modal, Input, Table, Badge } from '../components/UI.jsx';
 import { api } from '../utils/api.js';
 import { Plus, FileDown, Trash2 } from 'lucide-react';
 
@@ -140,7 +140,15 @@ export const Invoices = () => {
       label: 'Amount',
       render: (row) => `$${(row.totalCents / 100).toFixed(2)}`,
     },
-    { key: 'status', label: 'Status' },
+    {
+      key: 'status',
+      label: 'Status',
+      render: (row) => (
+        <Badge color={row.status === 'paid' ? 'green' : row.status === 'sent' ? 'yellow' : 'blue'}>
+          {row.status}
+        </Badge>
+      ),
+    },
     {
       key: 'actions',
       label: 'Actions',
@@ -165,8 +173,8 @@ export const Invoices = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-3xl font-bold">Invoices</h1>
+      <div className="sticky top-16 z-40 -mx-4 px-4 pt-4 pb-3 bg-slate-50/95 backdrop-blur border-b flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-3xl font-bold text-center sm:text-left">Invoices</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Invoice</span>
         </Button>
@@ -307,7 +315,44 @@ export const Invoices = () => {
         </form>
       </Modal>
 
-      <Card>
+      <div className="md:hidden space-y-4">
+        {invoices.map((invoice) => (
+          <Card key={invoice._id} className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold text-slate-900">{invoice.number}</div>
+              <div className="flex gap-2 items-center">
+                <button
+                  onClick={() => navigate(`/app/invoices/${invoice._id}`)}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                  type="button"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => handleDownloadPDF(invoice._id)}
+                  className="text-green-600 hover:text-green-700"
+                  title="Download PDF"
+                  type="button"
+                >
+                  <FileDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="text-sm text-slate-600">
+              <div><span className="font-medium text-slate-800">Client:</span> {invoice.clientId?.name || 'N/A'}</div>
+              <div><span className="font-medium text-slate-800">Amount:</span> ${(invoice.totalCents / 100).toFixed(2)}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-slate-800">Status:</span>
+                <Badge color={invoice.status === 'paid' ? 'green' : invoice.status === 'sent' ? 'yellow' : 'blue'}>
+                  {invoice.status}
+                </Badge>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="hidden md:block">
         <Table columns={columns} data={invoices} />
       </Card>
     </div>

@@ -26,6 +26,8 @@ export const api = {
     logout: () => apiRequest('/auth/logout', { method: 'POST' }),
     refresh: () => apiRequest('/auth/refresh', { method: 'POST' }),
     me: () => apiRequest('/auth/me'),
+    updatePassword: (data) => apiRequest('/auth/password', { method: 'POST', body: JSON.stringify(data) }),
+    deleteAccount: () => apiRequest('/auth/account', { method: 'DELETE' }),
   },
   
   clients: {

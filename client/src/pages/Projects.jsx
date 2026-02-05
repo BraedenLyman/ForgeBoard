@@ -168,8 +168,8 @@ export const Projects = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
-        <h1 className="text-3xl font-bold">Projects</h1>
+      <div className="sticky top-16 z-40 -mx-4 px-4 pt-4 pb-3 bg-slate-50/95 backdrop-blur border-b flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
+        <h1 className="text-3xl font-bold text-center sm:text-left">Projects</h1>
         <Button onClick={() => setIsModalOpen(true)}>
           <span className="flex items-center"><Plus className="w-4 h-4 mr-2" />New Project</span>
         </Button>
@@ -327,7 +327,57 @@ export const Projects = () => {
         </div>
       </Modal>
 
-      <Card>
+      <div className="md:hidden space-y-4">
+        {projects.map((project) => (
+          <Card key={project._id} className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold text-slate-900">{project.title}</div>
+              <div className="flex gap-2 items-center">
+                <button
+                  ref={el => {
+                    if (infoPopover.open && infoPopover.project && infoPopover.project._id === project._id) infoPopover.anchor = el;
+                  }}
+                  onClick={(e) => setInfoPopover({ open: true, project, anchor: e.currentTarget })}
+                  className="text-slate-500 hover:text-slate-700"
+                  title="View Info"
+                  type="button"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setEditModal({
+                    open: true,
+                    project: {
+                      ...project,
+                      clientId: project.clientId?._id || project.clientId,
+                      status: project.status || 'active',
+                    },
+                  })}
+                  className="text-blue-600 hover:text-blue-700"
+                  title="Edit Project"
+                  type="button"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDeleteModal({ open: true, projectId: project._id })}
+                  className="text-red-600 hover:text-red-700"
+                  title="Delete Project"
+                  type="button"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="text-sm text-slate-600">
+              <div><span className="font-medium text-slate-800">Client:</span> {project.clientId?.name || 'N/A'}</div>
+              <div><span className="font-medium text-slate-800">Status:</span> {project.status || 'active'}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="hidden md:block">
         <Table columns={columns} data={projects} />
       </Card>
 
@@ -335,6 +385,7 @@ export const Projects = () => {
         open={infoPopover.open}
         anchorRef={{ current: infoPopover.anchor }}
         onClose={() => setInfoPopover({ open: false, project: null, anchor: null })}
+        centerOnMobile
       >
         {infoPopover.project && (
           <div className="space-y-2">

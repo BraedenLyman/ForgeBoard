@@ -16,16 +16,16 @@ export const Navbar = () => {
 
   if (!user) {
     return (
-      <nav className="bg-white shadow">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-blue-600">
+      <nav className="bg-white shadow-sm sm:shadow sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-5 sm:py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <Link to="/" className="text-3xl sm:text-2xl font-bold text-blue-600 text-center sm:text-left">
             ForgeBoard
           </Link>
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => navigate('/login')}>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="ghost" onClick={() => navigate('/login')} className="w-full sm:w-auto">
               Login
             </Button>
-            <Button onClick={() => navigate('/register')}>Sign Up</Button>
+            <Button onClick={() => navigate('/register')} className="w-full sm:w-auto">Sign Up</Button>
           </div>
         </div>
       </nav>
@@ -33,39 +33,36 @@ export const Navbar = () => {
   }
 
   return (
-    <nav className="bg-white shadow">
-      <div className="container mx-auto px-4 py-4">
+    <nav className="bg-white shadow-sm sm:shadow sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-5 sm:py-4">
         <div className="flex justify-between items-center">
-          <Link to="/app" className="text-2xl font-bold text-blue-600">
+          <Link to="/app" className="text-3xl sm:text-2xl font-bold text-blue-600">
             ForgeBoard
           </Link>
 
-          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          <button className="md:hidden p-2 -mr-2 rounded-lg bg-slate-100 text-slate-700" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X /> : <Menu />}
           </button>
 
-          <div className={`${isOpen ? 'block' : 'hidden'} md:flex md:gap-4 absolute md:static top-16 left-0 right-0 md:top-auto bg-white md:bg-transparent p-4 md:p-0`}>
-            <Link to="/app" className="block md:inline text-slate-600 hover:text-blue-600">
+          <div className={`${isOpen ? 'block' : 'hidden'} md:flex md:gap-4 absolute md:static top-16 left-0 right-0 md:top-auto bg-white md:bg-transparent p-6 md:p-0 shadow-md md:shadow-none border-b md:border-b-0`}>
+            <Link to="/app" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Dashboard
             </Link>
-            <Link to="/app/leads" className="block md:inline text-slate-600 hover:text-blue-600">
+            <Link to="/app/leads" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Leads
             </Link>
-            <Link to="/app/clients" className="block md:inline text-slate-600 hover:text-blue-600">
+            <Link to="/app/clients" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Clients
             </Link>
-            <Link to="/app/projects" className="block md:inline text-slate-600 hover:text-blue-600">
+            <Link to="/app/projects" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Projects
             </Link>
-            <Link to="/app/invoices" className="block md:inline text-slate-600 hover:text-blue-600">
+            <Link to="/app/invoices" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Invoices
             </Link>
-            <Link to="/app/settings" className="block md:inline text-slate-600 hover:text-blue-600">
+            <Link to="/app/settings" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Settings
             </Link>
-            <Button variant="ghost" onClick={handleLogout}>
-              Logout
-            </Button>
           </div>
         </div>
       </div>
