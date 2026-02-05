@@ -6,6 +6,9 @@ const timeLogSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     date: { type: Date, required: true },
     minutes: { type: Number, required: true },
+    rateCents: { type: Number },
+    invoiced: { type: Boolean, default: false },
+    invoiceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice' },
     note: String,
   },
   { timestamps: true }

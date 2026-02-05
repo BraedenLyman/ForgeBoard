@@ -58,6 +58,9 @@ export const Navbar = () => {
             <Link to="/app/projects" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Projects
             </Link>
+            <Link to="/app/timelogs" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
+              Time Logs
+            </Link>
             <Link to="/app/invoices" onClick={() => setIsOpen(false)} className="block md:inline text-slate-600 hover:text-blue-600">
               Invoices
             </Link>

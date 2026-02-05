@@ -50,6 +50,7 @@ export const createInvoice = asyncHandler(async (req, res) => {
       });
 
       await invoice.save();
+
       return res.status(201).json(invoice);
     } catch (err) {
       if (err?.code === 11000) {
@@ -204,6 +205,7 @@ export const generateInvoicePDF = asyncHandler(async (req, res) => {
   doc.font('Helvetica-Bold').fontSize(11);
   doc.text('Total:', col.amount - 40, y);
   doc.text(`$${(invoice.totalCents / 100).toFixed(2)}`, col.amount, y);
+
 
   if (invoice.status === 'paid') {
     doc.fontSize(14).fillColor('green').text('PAID', { align: 'center' });

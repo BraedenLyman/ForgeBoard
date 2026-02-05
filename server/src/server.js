@@ -13,6 +13,7 @@ import clientRoutes from './routes/clients.js';
 import leadRoutes from './routes/leads.js';
 import projectRoutes from './routes/projects.js';
 import invoiceRoutes from './routes/invoices.js';
+import timeLogRoutes from './routes/timeLogs.js';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/invoices', invoiceRoutes);
+app.use('/api/timelogs', timeLogRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -14,7 +14,7 @@ export const ProjectDetail = () => {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showTimeForm, setShowTimeForm] = useState(false);
   const [taskForm, setTaskForm] = useState({ title: '', priority: 'med' });
-  const [timeForm, setTimeForm] = useState({ date: '', minutes: '' });
+  const [timeForm, setTimeForm] = useState({ date: '', hours: '', rate: '', note: '' });
 
   useEffect(() => {
     loadProjectDetail();
@@ -48,8 +48,14 @@ export const ProjectDetail = () => {
   const handleAddTimeLog = async (e) => {
     e.preventDefault();
     try {
-      await api.projects.timeLogs.create(id, timeForm);
-      setTimeForm({ date: '', minutes: '' });
+      const minutes = Math.round(Number(timeForm.hours) * 60);
+      await api.projects.timeLogs.create(id, {
+        date: timeForm.date,
+        minutes,
+        rateCents: timeForm.rate === '' ? undefined : Math.round(Number(timeForm.rate) * 100),
+        note: timeForm.note,
+      });
+      setTimeForm({ date: '', hours: '', rate: '', note: '' });
       setShowTimeForm(false);
       loadProjectDetail();
     } catch (err) {
@@ -73,6 +79,7 @@ export const ProjectDetail = () => {
   if (!project) return <Error message="Project not found" />;
 
   const totalHours = project.totalMinutes ? (project.totalMinutes / 60).toFixed(1) : 0;
+  const projectRate = project.hourlyRateCents ? (project.hourlyRateCents / 100).toFixed(2) : '';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -170,11 +177,24 @@ export const ProjectDetail = () => {
               required
             />
             <Input
-              label="Minutes"
+              label="Hours"
               type="number"
-              value={timeForm.minutes}
-              onChange={(e) => setTimeForm({ ...timeForm, minutes: e.target.value })}
+              step="0.25"
+              value={timeForm.hours}
+              onChange={(e) => setTimeForm({ ...timeForm, hours: e.target.value })}
               required
+            />
+            <Input
+              label={`Rate ($/hr)${projectRate ? ` (project: $${projectRate})` : ''}`}
+              type="number"
+              step="0.01"
+              value={timeForm.rate}
+              onChange={(e) => setTimeForm({ ...timeForm, rate: e.target.value })}
+            />
+            <Input
+              label="Note (optional)"
+              value={timeForm.note}
+              onChange={(e) => setTimeForm({ ...timeForm, note: e.target.value })}
             />
             <Button type="submit">Add Time Log</Button>
           </form>
@@ -185,9 +205,19 @@ export const ProjectDetail = () => {
             <div key={log._id} className="flex justify-between items-center p-3 border-b">
               <div>
                 <p className="font-medium">{new Date(log.date).toLocaleDateString()}</p>
-                <p className="text-sm text-slate-600">{log.minutes} minutes</p>
+                <p className="text-sm text-slate-600">{(log.minutes / 60).toFixed(2)} hours</p>
               </div>
-              {log.note && <p className="text-sm text-slate-500">{log.note}</p>}
+              <div className="text-right">
+                <p className="text-sm text-slate-600">
+                  Rate: $
+                  {((log.rateCents ?? project.hourlyRateCents ?? 0) / 100).toFixed(2)}
+                  /hr
+                </p>
+                <p className="text-sm font-medium">
+                  ${(((log.rateCents ?? project.hourlyRateCents ?? 0) * log.minutes) / 6000).toFixed(2)}
+                </p>
+                {log.note && <p className="text-xs text-slate-500">{log.note}</p>}
+              </div>
             </div>
           ))}
         </div>

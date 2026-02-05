@@ -54,6 +54,7 @@ export const Invoices = () => {
     }
   };
 
+
   const validateInvoice = (data) => {
     const errors = {};
     if (!data.clientId || !String(data.clientId).trim()) errors.clientId = 'Client is required';
@@ -81,15 +82,15 @@ export const Invoices = () => {
       return;
     }
     try {
-      const payload = {
-        ...formData,
-        lineItems: formData.lineItems.map((item) => ({
-          description: item.description,
-          qty: Number(item.qty),
-          unitPriceCents: Math.round(Number(item.unitPrice) * 100),
-        })),
-      };
-      await api.invoices.create(payload);
+        const payload = {
+          ...formData,
+          lineItems: formData.lineItems.map((item) => ({
+            description: item.description,
+            qty: Number(item.qty),
+            unitPriceCents: Math.round(Number(item.unitPrice) * 100),
+          })),
+        };
+        await api.invoices.create(payload);
       setIsModalOpen(false);
       setFormData({
         clientId: '',
@@ -127,6 +128,7 @@ export const Invoices = () => {
       };
     });
   };
+
 
   const columns = [
     { key: 'number', label: 'Number' },
@@ -314,6 +316,7 @@ export const Invoices = () => {
           </Button>
         </form>
       </Modal>
+
 
       <div className="md:hidden space-y-4">
         {invoices.map((invoice) => (

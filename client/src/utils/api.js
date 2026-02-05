@@ -82,4 +82,11 @@ export const api = {
     update: (id, data) => apiRequest(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     getPDF: (id) => `${API_URL}/invoices/${id}/pdf`,
   },
+
+  timeLogs: {
+    getAll: (params) => {
+      const query = params ? new URLSearchParams(params).toString() : '';
+      return apiRequest(`/timelogs${query ? `?${query}` : ''}`);
+    },
+  },
 };

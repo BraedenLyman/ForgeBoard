@@ -44,9 +44,17 @@ export const getProjectDetail = asyncHandler(async (req, res) => {
   const timeLogs = await TimeLog.find({ projectId: project._id });
 
   const totalMinutes = timeLogs.reduce((sum, log) => sum + log.minutes, 0);
-  const totalCents = project.hourlyRateCents
-    ? (totalMinutes / 60) * project.hourlyRateCents
-    : project.flatFeeCents || 0;
+  const totalCents = timeLogs.length > 0
+    ? (() => {
+      const sum = timeLogs.reduce((acc, log) => {
+        const rate = log.rateCents ?? project.hourlyRateCents ?? 0;
+        return acc + (log.minutes / 60) * rate;
+      }, 0);
+      return sum > 0 ? sum : (project.flatFeeCents || 0);
+    })()
+    : project.hourlyRateCents
+      ? (totalMinutes / 60) * project.hourlyRateCents
+      : project.flatFeeCents || 0;
 
   res.json({
     ...project.toObject(),
@@ -151,7 +159,7 @@ export const getTimeLogs = asyncHandler(async (req, res) => {
 });
 
 export const createTimeLog = asyncHandler(async (req, res) => {
-  const { date, minutes, note } = req.body;
+  const { date, minutes, note, rateCents } = req.body;
 
   if (!date || !minutes) {
     return res.status(400).json({
@@ -164,6 +172,9 @@ export const createTimeLog = asyncHandler(async (req, res) => {
     userId: req.userId,
     date: new Date(date),
     minutes: parseInt(minutes),
+    rateCents: rateCents !== undefined && rateCents !== null && rateCents !== ''
+      ? parseInt(rateCents)
+      : undefined,
     note,
   });
 

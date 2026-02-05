@@ -16,6 +16,7 @@ import { ProjectDetail } from './pages/ProjectDetail.jsx';
 import { Invoices } from './pages/Invoices.jsx';
 import { InvoiceDetail } from './pages/InvoiceDetail.jsx';
 import { Settings } from './pages/Settings.jsx';
+import { TimeLogs } from './pages/TimeLogs.jsx';
 
 const AppContent = () => {
   const location = useLocation();
@@ -106,6 +107,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <InvoiceDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/timelogs"
+            element={
+              <ProtectedRoute>
+                <TimeLogs />
               </ProtectedRoute>
             }
           />
