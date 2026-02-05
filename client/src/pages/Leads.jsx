@@ -11,15 +11,46 @@ export const Leads = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
   const [formData, setFormData] = useState({
     title: '',
-    value: 0,
-    source: 'direct',
+    value: '',
+    source: '',
     notes: '',
   });
   const [deleteModal, setDeleteModal] = useState({ open: false, leadId: null });
   const [editModal, setEditModal] = useState({ open: false, lead: null });
   const [infoPopover, setInfoPopover] = useState({ open: false, lead: null, anchor: null });
+
+  const leadTitleRegex = /^[A-Za-z0-9 ]+$/;
+  const leadSourceRegex = /^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+$/;
+  const leadNotesRegex = /^[A-Za-z0-9. ]+$/;
+  const sanitizeNumericInput = (raw) => {
+    const cleaned = raw.replace(/[^0-9.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length <= 1) return cleaned;
+    return `${parts.shift()}.${parts.join('')}`;
+  };
+  const sanitizeSourceInput = (raw) => raw.replace(/[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+/g, '');
+  const sanitizeNotesInput = (raw) => raw.replace(/[^A-Za-z0-9. ]+/g, '').slice(0, 150);
+
+  const validateLead = (data) => {
+    const errors = {};
+    if (!data.title || !String(data.title).trim()) {
+      errors.title = 'Title is required';
+    } else if (!leadTitleRegex.test(String(data.title).trim())) {
+      errors.title = 'Title may only include letters, numbers, and spaces';
+    }
+    if (data.value === '' || data.value === null || Number.isNaN(Number(data.value))) {
+      errors.value = 'Value is required';
+    }
+    if (!data.source || !String(data.source).trim()) errors.source = 'Source is required';
+    if (data.notes && (!leadNotesRegex.test(String(data.notes)) || String(data.notes).length > 150)) {
+      errors.notes = 'Notes may only include letters, numbers, spaces, and periods (max 150 chars)';
+    }
+    return errors;
+  };
 
   useEffect(() => {
     loadLeads();
@@ -38,13 +69,19 @@ export const Leads = () => {
 
   const handleCreateLead = async (e) => {
     e.preventDefault();
+    const errors = validateLead(formData);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
     try {
       await api.leads.create({
         ...formData,
-        valueCents: Math.round(formData.value * 100),
+        valueCents: Math.round(Number(formData.value) * 100),
       });
       setIsModalOpen(false);
-      setFormData({ title: '', value: 0, source: 'direct', notes: '' });
+      setFormData({ title: '', value: '', source: '', notes: '' });
+      setFormErrors({});
       loadLeads();
     } catch (err) {
       setError(err.error?.message || 'Failed to create lead');
@@ -63,6 +100,11 @@ export const Leads = () => {
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    const errors = validateLead(editModal.lead);
+    if (Object.keys(errors).length > 0) {
+      setEditErrors(errors);
+      return;
+    }
     try {
       // Ensure value is a number
       const value = typeof editModal.lead.value === 'string' ? parseFloat(editModal.lead.value) : editModal.lead.value;
@@ -74,6 +116,7 @@ export const Leads = () => {
         stage: editModal.lead.stage,
       });
       setEditModal({ open: false, lead: null });
+      setEditErrors({});
       loadLeads();
     } catch (err) {
       setError(err.error?.message || 'Failed to update lead');
@@ -110,29 +153,63 @@ export const Leads = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Lead">
         <form onSubmit={handleCreateLead}>
           <Input
-            label="Title"
+            label="Title *"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            error={formErrors.title}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^A-Za-z0-9 ]+/g, '');
+              setFormData({ ...formData, title: value });
+              if (formErrors.title && String(value).trim() && leadTitleRegex.test(String(value).trim())) {
+                setFormErrors({ ...formErrors, title: '' });
+              }
+            }}
+            pattern="[A-Za-z0-9 ]+"
             required
           />
           <Input
-            label="Value ($)"
-            type="number"
+            label="Value ($) *"
+            type="text"
             value={formData.value}
             min={0}
             step={0.01}
-            onChange={(e) => setFormData({ ...formData, value: parseFloat(e.target.value) })}
+            error={formErrors.value}
+            onChange={(e) => {
+              const raw = sanitizeNumericInput(e.target.value);
+              setFormData({ ...formData, value: raw });
+              if (formErrors.value && raw !== '' && !Number.isNaN(Number(raw))) {
+                setFormErrors({ ...formErrors, value: '' });
+              }
+            }}
+            inputMode="decimal"
+            pattern="[0-9]*[.]?[0-9]*"
             required
           />
           <Input
-            label="Source"
+            label="Source *"
             value={formData.source}
-            onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+            error={formErrors.source}
+            onChange={(e) => {
+              const value = sanitizeSourceInput(e.target.value);
+              setFormData({ ...formData, source: value });
+              if (formErrors.source && String(value).trim() && leadSourceRegex.test(String(value).trim())) {
+                setFormErrors({ ...formErrors, source: '' });
+              }
+            }}
+            pattern="[A-Za-z0-9\-._~:/?#\\[\\]@!$&'()*+,;=% ]+"
+            required
           />
           <Input
-            label="Notes"
+            label="Notes (optional)"
             value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            error={formErrors.notes}
+            onChange={(e) => {
+              const value = sanitizeNotesInput(e.target.value);
+              setFormData({ ...formData, notes: value });
+              if (formErrors.notes && leadNotesRegex.test(String(value)) && String(value).length <= 150) {
+                setFormErrors({ ...formErrors, notes: '' });
+              }
+            }}
+            maxLength={150}
           />
           <Button type="submit" className="w-full">
             Create Lead
@@ -158,29 +235,63 @@ export const Leads = () => {
         {editModal.lead && (
           <form onSubmit={handleEdit}>
             <Input
-              label="Title"
+              label="Title *"
               value={editModal.lead.title}
-              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, title: e.target.value } })}
+              error={editErrors.title}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z0-9 ]+/g, '');
+                setEditModal({ ...editModal, lead: { ...editModal.lead, title: value } });
+                if (editErrors.title && String(value).trim() && leadTitleRegex.test(String(value).trim())) {
+                  setEditErrors({ ...editErrors, title: '' });
+                }
+              }}
+              pattern="[A-Za-z0-9 ]+"
               required
             />
             <Input
-              label="Value ($)"
-              type="number"
+              label="Value ($) *"
+              type="text"
               value={editModal.lead.value}
               min={0}
               step={0.01}
-              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, value: parseFloat(e.target.value) } })}
+              error={editErrors.value}
+              onChange={(e) => {
+                const raw = sanitizeNumericInput(e.target.value);
+                setEditModal({ ...editModal, lead: { ...editModal.lead, value: raw } });
+                if (editErrors.value && raw !== '' && !Number.isNaN(Number(raw))) {
+                  setEditErrors({ ...editErrors, value: '' });
+                }
+              }}
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
               required
             />
             <Input
-              label="Source"
+              label="Source *"
               value={editModal.lead.source}
-              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, source: e.target.value } })}         
+              error={editErrors.source}
+              onChange={(e) => {
+                const value = sanitizeSourceInput(e.target.value);
+                setEditModal({ ...editModal, lead: { ...editModal.lead, source: value } });
+                if (editErrors.source && String(value).trim() && leadSourceRegex.test(String(value).trim())) {
+                  setEditErrors({ ...editErrors, source: '' });
+                }
+              }}         
+              pattern="[A-Za-z0-9\-._~:/?#\\[\\]@!$&'()*+,;=% ]+"
+              required
             />
             <Input
-              label="Notes"
+              label="Notes (optional)"
               value={editModal.lead.notes}
-              onChange={(e) => setEditModal({ ...editModal, lead: { ...editModal.lead, notes: e.target.value } })}
+              error={editErrors.notes}
+              onChange={(e) => {
+                const value = sanitizeNotesInput(e.target.value);
+                setEditModal({ ...editModal, lead: { ...editModal.lead, notes: value } });
+                if (editErrors.notes && leadNotesRegex.test(String(value)) && String(value).length <= 150) {
+                  setEditErrors({ ...editErrors, notes: '' });
+                }
+              }}
+              maxLength={150}
             />
             <select
               className="w-full mb-4 px-2 py-1 border rounded text-sm"

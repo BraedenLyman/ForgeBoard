@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const leadTitleRegex = /^[A-Za-z0-9 ]+$/;
+
 export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email'),
@@ -22,11 +24,26 @@ export const clientSchema = z.object({
 
 export const leadSchema = z.object({
   clientId: z.string().optional(),
-  title: z.string().min(1, 'Title is required'),
-  valueCents: z.number().min(0).optional(),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required')
+    .regex(leadTitleRegex, 'Title may only include letters, numbers, and spaces'),
+  valueCents: z.number().min(0),
   stage: z.enum(['lead', 'contacted', 'proposal', 'won', 'lost']).optional(),
-  source: z.string().optional(),
-  notes: z.string().optional(),
+  source: z
+    .string()
+    .trim()
+    .min(1, 'Source is required')
+    .regex(
+      /^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+$/,
+      'Source contains invalid characters'
+    ),
+  notes: z
+    .string()
+    .max(150, 'Notes must be 150 characters or fewer')
+    .regex(/^[A-Za-z0-9. ]+$/, 'Notes may only include letters, numbers, spaces, and periods')
+    .optional(),
 });
 
 export const projectSchema = z.object({

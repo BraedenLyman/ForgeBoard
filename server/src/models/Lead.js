@@ -4,15 +4,33 @@ const leadSchema = new mongoose.Schema(
   {
     ownerUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client' },
-    title: { type: String, required: true },
-    valueCents: { type: Number, default: 0 },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      match: [/^[A-Za-z0-9 ]+$/, 'Title may only include letters, numbers, and spaces'],
+    },
+    valueCents: { type: Number, required: true, min: 0 },
     stage: {
       type: String,
       enum: ['lead', 'contacted', 'proposal', 'won', 'lost'],
       default: 'lead',
     },
-    source: { type: String, default: 'direct' },
-    notes: String,
+    source: {
+      type: String,
+      required: true,
+      trim: true,
+      match: [
+        /^[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=% ]+$/,
+        'Source contains invalid characters',
+      ],
+    },
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      match: [/^[A-Za-z0-9. ]+$/, 'Notes may only include letters, numbers, spaces, and periods'],
+    },
   },
   { timestamps: true }
 );
