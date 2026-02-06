@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: forgeboard-api
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: cd server && npm ci
+    startCommand: cd server && node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://braedenlyman.github.io/ForgeBoard
+      - key: MONGODB_URI
+        sync: false
