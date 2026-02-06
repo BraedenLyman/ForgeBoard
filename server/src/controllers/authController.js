@@ -30,17 +30,14 @@ export const register = asyncHandler(async (req, res) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  res.cookie('accessToken', accessToken, {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  };
 
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+  res.cookie('accessToken', accessToken, cookieOptions);
+  res.cookie('refreshToken', refreshToken, cookieOptions);
 
   res.status(201).json({
     user: {
@@ -66,17 +63,14 @@ export const login = asyncHandler(async (req, res) => {
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
 
-  res.cookie('accessToken', accessToken, {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  };
 
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+  res.cookie('accessToken', accessToken, cookieOptions);
+  res.cookie('refreshToken', refreshToken, cookieOptions);
 
   res.json({
     user: {
@@ -114,11 +108,13 @@ export const refresh = asyncHandler(async (req, res) => {
 
   const newAccessToken = generateAccessToken(user._id);
 
-  res.cookie('accessToken', newAccessToken, {
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  };
+
+  res.cookie('accessToken', newAccessToken, cookieOptions);
 
   res.json({ accessToken: newAccessToken });
 });
