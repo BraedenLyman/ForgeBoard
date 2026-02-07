@@ -10,6 +10,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: FRONTEND_URLS
-        value: https://braedenlyman.github.io/
+        value: https://braedenlyman.github.io,http://localhost:5173
       - key: MONGODB_URI
         sync: false
