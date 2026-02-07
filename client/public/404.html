@@ -1,0 +1,13 @@
+<!doctype html>
+<meta charset="utf-8" />
+<script>
+  (function () {
+    var l = window.location;
+    var base = '/ForgeBoard';
+    var path = l.pathname.replace(base, '');
+    var newUrl = base + '/?/' + path.replace(/^\//, '');
+    if (l.search) newUrl += l.search.replace(/&/g, '~and~');
+    if (l.hash) newUrl += l.hash;
+    l.replace(newUrl);
+  })();
+</script>
