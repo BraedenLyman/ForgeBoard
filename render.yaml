@@ -9,7 +9,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        value: https://braedenlyman.github.io
+      - key: FRONTEND_URLS
+        value: https://braedenlyman.github.io/
       - key: MONGODB_URI
         sync: false
