@@ -105,9 +105,15 @@ export const Invoices = () => {
     }
   };
 
-  const handleDownloadPDF = (id) => {
-    const pdfUrl = api.invoices.getPDF(id);
-    window.open(pdfUrl, '_blank');
+  const handleDownloadPDF = async (id) => {
+    try {
+      const blob = await api.invoices.getPDFBlob(id);
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener,noreferrer');
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (err) {
+      setError(err.error?.message || 'Failed to download PDF');
+    }
   };
 
   if (isLoading) return <Loading />;

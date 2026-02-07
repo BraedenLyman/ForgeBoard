@@ -81,6 +81,16 @@ export const api = {
     getDetail: (id) => apiRequest(`/invoices/${id}`),
     update: (id, data) => apiRequest(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     getPDF: (id) => `${API_URL}/invoices/${id}/pdf`,
+    getPDFBlob: async (id) => {
+      const response = await fetch(`${API_URL}/invoices/${id}/pdf`, {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw error;
+      }
+      return response.blob();
+    },
   },
 
   timeLogs: {
